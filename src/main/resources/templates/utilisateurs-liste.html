@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0">
+
+    <title>LUVMO - Liste des Utilisateurs</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
+
+    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/stylebs.css}"/>
+
+
+</head>
+<body>
+<header>
+    <div th:replace="fragments/header :: header"></div>
+</header>
+<div th:if="${message!= null}" class="alert alert-success text-center">
+    [[${message}]]
+</div>
+<div class="container-fluid">
+
+    <div>
+            <span th:if="${session.status != null && session.status != 'Admin'}">Filtres
+                <form th:action="@{/utilisateurs/liste}" method="get">
+                    <label for="age">Age : </label>
+                    <input type="range" id="age" name="age" min="21" max="100"
+                           th:value="${session.limiteAge} != null ? ${session.limiteAge} : 100">
+
+                    <label for="localisation">Localisation : </label>
+                    <select name="localisation" id="localisation">
+                        <option value=null selected>Selectionner</option>
+                        <option th:each="loc : ${listLocalisations}" th:value="${loc}">[[${loc}]]</option>
+                    </select>
+                        <input type="submit" value="Filtrer"/>
+                </form>
+            </span>
+    </div>
+    <div class="container rounded mt-5 bg-light p-md-5 mb-3 shadow-sm">
+
+        <div class="h2 font-weight-bold">Utilisateurs</div>
+        <div th:if="${session.status == 'Admin'}">
+            <a th:href="@{/utilisateurs/new}"><h2>Ajouter un nouvel utilisateur</h2></a>
+            <a th:href="@{/utilisateurs/export/pdf}">Exporter en PDF</a>
+        </div>
+        <div class="table-responsive-xl">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col text-center">Nom</th>
+                    <th scope="col">Age</th>
+                    <th scope="col">Localisation</th>
+                    <th scope="col text-center">Description</th>
+                    <th scope="col text-center">En ligne</th>
+
+                </tr>
+                </thead>
+                <tbody>
+                <div th:each="user : ${listUtilisateurs}">
+                    <tr class="bg-table">
+                        <input type="hidden" th:value="${user.id}"/>
+                        <td class="pt-2"><img th:src="@{${'/images/utilisateurs/' + user.imgLink}}"
+                                              class="rounded imgListe"
+                                              alt="">
+                            <div class="pl-lg-5 pl-md-3 pl-1 name">[[${user.prenom}]]</div>
+                        </td>
+                        <td class="pt-2 mt-1 align-middle">[[${user.age}]]</td>
+                        <td class="pt-2 align-middle">[[${user.localisation}]]</td>
+                        <td class="pt-2 align-middle">[[${user.description}]]</td>
+                        <td th:if="${user.enLigne}" class="pt-2 align-middle"><i
+                                class="fa-solid fa-circle fa-2x icon-green"></i></td>
+                        <td th:if="${!user.enLigne}" class="pt-2 align-middle"><i
+                                class="fa-solid fa-circle fa-2x icon-dark"></i></td>
+                        <td th:if="${session.status != null && session.status != 'Admin'}" class="pt-2 align-middle">
+                            <a th:href="@{'/utilisateurs/liste/dislike/' + ${user.id}}" title="Dislike"><i
+                                    class="fa-solid fa-circle-xmark fa-2x icon-red"></i></a>
+                            <a th:href="@{'/utilisateurs/liste/like/' + ${user.id}}" title="Like"><i
+                                    class="fa-solid fa-check-circle fa-2x icon-green"></i></a>
+                            <a th:if="${session.status == 'Privilège'}"
+                               th:href="@{'/utilisateurs/liste/superlike/' + ${user.id}}" title="Superlike"><i
+                                    class="fa-solid fa-face-grin-hearts fa-2x icon-gold"></i></a>
+                        </td>
+                        <td th:if="${session.status != null && session.status == 'Admin'}" class="pt-2 align-middle">
+                            <div class="mr-4 mb-2"><a th:href="@{'/utilisateurs/delete/' + ${user.id}}" title="Supprimer cet utilisateur"><i
+                                    class="fa-solid fa-trash fa-2x icon-red"></i></a></div>
+                            <a th:href="@{'/utilisateurs/modifier/' + ${user.id}}" title="Modifier cet utilisateur"><i
+                                    class="fa-solid fa-user-gear fa-2x icon-dark"></i></a>
+                        </td>
+                    </tr>
+                    <tr id="spacing-row">
+                        <td></td>
+                    </tr>
+                </div>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div th:replace="fragments/footer :: footer"></div>
+    <script>
+    $(document).ready(function(){
+        setInterval(function(){load_online_status();}, 3000);
+    });
+    $( document ).ready( load_online_status );
+
+    function load_online_status()
+        {
+            $('.bg-table').each(function(i, obj) {
+                $.ajax({
+                    type : 'POST',
+                    url :  '[[@{/utilisateurs/check_online}]]',
+                    data: {idUser:$(this).find('input').val()},
+                    success : function(data) {
+                      var iconStatus = $('.fa-circle');
+                        if(data === 'Online')
+                       {
+                       $(iconStatus[i]).removeClass('icon-dark').addClass('icon-green');
+                       }else{
+                       $(iconStatus[i]).removeClass('icon-green').addClass('icon-dark');
+                       }
+                    }
+                });
+            });
+
+        };
+
+
+    </script>
+</body>
+</html>

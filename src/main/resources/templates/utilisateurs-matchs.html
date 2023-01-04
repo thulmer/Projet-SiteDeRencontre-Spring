@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html  xmlns:th="http://www.thymeleaf.org" lang="">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0">
+
+    <title>LUVMO - Mes Matchs</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
+
+    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/stylebs.css}"/>
+
+
+</head>
+<body>
+<header>
+    <div th:replace="fragments/header :: header"></div>
+</header>
+<div th:if="${message!= null}" class="alert alert-danger text-center">
+    [[${message}]]
+</div>
+<div class="container-fluid">
+    <div class="container rounded mt-5 bg-light p-md-5 mb-3 shadow-sm">
+        <div class="h2 font-weight-bold">Mes matchs</div>
+        <div class="table-responsive-xl">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col text-center">Nom</th>
+                    <th scope="col">Age</th>
+                    <th scope="col">Localisation</th>
+                    <th scope="col text-center">Description</th>
+                    <th scope="col text-center">En ligne</th>
+                </tr>
+                </thead>
+                <tbody>
+                <div th:each="user : ${listUtilisateurs}">
+                    <tr class="bg-table">
+                        <input type="hidden" th:value="${user.id}" />
+                        <td class="pt-2 align-middle">
+                            <img th:src="@{${'/images/utilisateurs/' + user.imgLink}}" class="rounded-circle imgMatchs" alt="">
+                            <div class="pl-lg-5 pl-md-3 pl-1 name">[[${user.prenom}]]</div>
+                        </td>
+                        <td class="pt-2 mt-1 align-middle text-center">[[${user.age}]]</td>
+                        <td class="pt-2 align-middle">[[${user.localisation}]]</td>
+                        <td class="pt-2 align-middle text">[[${user.description}]]</td>
+                        <td th:if="${user.enLigne}" class="pt-2 align-middle"><i
+                                class="fa-solid fa-circle fa-2x icon-green"></i></td>
+                        <td th:if="${!user.enLigne}" class="pt-2 align-middle"><i
+                                class="fa-solid fa-circle fa-2x icon-dark"></i></td>
+                        <td>
+                            <a th:href="@{'/matchs/chat/' + ${user.id}}" class="position-relative" title="Chat">
+                                <i class="fa-regular fa-comment-dots fa-2x"></i>
+                                <span class="badge badge-pill badge-danger countMsg" style="position: absolute; top:0px; right:0px"></span>
+                            </a>
+                            <a th:href="@{'/matchs/delete/' + ${user.id}}" class="ms-md-4" title="Supprimer ce match"><i class="fa-solid fa-trash fa-2x icon-red link-delete"></i></a>
+                        </td>
+                    </tr>
+                    <tr id="spacing-row">
+                        <td></td>
+                    </tr>
+                </div>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div th:replace="fragments/footer :: footer"></div>
+
+<script>
+    $(document).ready(function(){
+        setInterval(function(){load_notifications_messages_et_online();}, 3000);
+    });
+    $( document ).ready( load_notifications_messages_et_online );
+
+    function load_notifications_messages_et_online()
+        {
+            $('.bg-table').each(function(i, obj) {
+               $.ajax({
+                    type : 'POST',
+                    url :  '[[@{/match/check_notifications_messages}]]',
+                    data: {idExp:$(this).find('input').val()},
+                    success : function(data) {
+                        if(data > 0)
+                       {
+                        var badgeMsg = $('.countMsg').get(i);
+                        badgeMsg.innerHTML = data;
+                       }
+                    }
+                });
+
+                $.ajax({
+                    type : 'POST',
+                    url :  '[[@{/utilisateurs/check_online}]]',
+                    data: {idUser:$(this).find('input').val()},
+                    success : function(data) {
+                      var iconStatus = $('.fa-circle');
+                        if(data === 'Online')
+                       {
+                       $(iconStatus[i]).removeClass('icon-dark').addClass('icon-green');
+                       }else{
+                       $(iconStatus[i]).removeClass('icon-green').addClass('icon-dark');
+                       }
+                    }
+                });
+            });
+
+        };
+
+</script>
+</body>
+</html>

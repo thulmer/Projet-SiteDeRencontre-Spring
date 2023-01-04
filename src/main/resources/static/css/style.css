@@ -1,0 +1,15 @@
+.icon-white {color: white}
+.icon-silver {color: silver}
+.icon-green {color: green}
+.icon-red {color: red}
+.icon-gold {color: gold}
+.icon-dark {color: gray}
+.img-responsive {
+        width: 46px;
+        height: 46px;
+        overflow: hidden;
+        margin-top: -6px;
+}
+
+
+

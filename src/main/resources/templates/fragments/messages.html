@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html  xmlns:th="http://www.thymeleaf.org" lang="">
+<div th:fragment="nouveauxMessages" th:if="${listNouveauxMessages!=null and !listNouveauxMessages.empty}" th:each="mess : ${listNouveauxMessages}">
+<div  th:if="${mess.expediteur != session.utilisateur}" class="row justify-content-left align-items-center">
+    <div class="col-auto"> <div class="pl-lg-5 pl-md-3 pl-1 name">[[${mess.expediteur.prenom}]]</div>
+        <img th:src="@{${'/images/utilisateurs/' + mess.expediteur.imgLink}}" class="rounded-circle imgMatchs" alt="">
+    </div>
+    <div class="col-auto py-2 bg-message-dest">[[${mess.contenu}]]</div>
+    <div class="col align-middle text-muted font-italic font-weight-light" th:text="${#dates.format(new java.util.Date(mess.date), 'yyyy-MM-dd HH:mm')}"></div>
+</div>
+<div id="spacing-row">
+</div>
+</div>
+</html>

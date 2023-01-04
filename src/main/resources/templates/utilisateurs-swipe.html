@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html  xmlns:th="http://www.thymeleaf.org" lang="">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0">
+
+    <title>LUVMO - Swipez les Utilisateurs</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
+
+    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/stylebs.css}"/>
+
+
+</head>
+<body>
+<header>
+    <div th:replace="fragments/header :: header"></div>
+</header>
+<div th:if="${message!= null}" class="alert alert-success text-center">
+    [[${message}]]
+</div>
+<div class="container-fluid">
+    <div>
+            <span th:if="${session.status != null}">Filtres :
+                <form th:action="@{/utilisateurs/liste}" method="get">
+                    <label for="age">Age : </label>
+                    <input type="range" id="age" name="age" min="21" max="100" th:value="${session.limiteAge} != null ? session.limiteAge : 100">
+
+                    <label for="localisation">Localisation : </label>
+                    <select name="localisation" id="localisation">
+                        <option value=null selected disabled hidden>Selectionner</option>
+                        <option th:each="loc : ${listLocalisations}" th:value="${loc}">[[${loc}]]</option>
+                    </select>
+                        <input type="submit"  value="Filtrer" />
+                </form>
+            </span>
+    </div>
+
+    <div th:if="${!listUtilisateurs.isEmpty()}" class="container rounded mt-2 bg-light p-md-4 mb-3 shadow-sm">
+        <div class="container">
+            <div class="row" id="card-container">
+                <div class="col-sm" id="">
+                <div class="card rounded-20 border-0 mb-3 mx-auto bg-table" style="width: 18rem;">
+                    <img class="card-img-top rounded-20" th:src="@{${'/images/utilisateurs/' + listUtilisateurs[0].imgLink}}" alt="">
+                    <div class="card-body">
+                        <h5 class="card-title">[[${listUtilisateurs[0].prenom}]]</h5>
+                        <p>En ligne :
+                            <i th:if="${listUtilisateurs[0].enLigne}" class="fa-solid fa-circle fa-2x icon-green"></i>
+                            <i th:if="${!listUtilisateurs[0].enLigne}" class="fa-solid fa-circle fa-2x icon-dark"></i>
+
+                        </p>
+                        <p><strong>Age : </strong>[[${listUtilisateurs[0].age}]]</p>
+                        <p><strong>Localisation : </strong>[[${listUtilisateurs[0].localisation}]]</p>
+                        <p class="card-text">[[${listUtilisateurs[0].description}]]</p>
+                    </div>
+                    <div th:if="${session.status != null}" class="card-footer bg-transparent border-0 justify-content-around row">
+                        <a class="col-sm-4 pb-2 mb-2" th:href="@{'/utilisateurs/swipe/dislike/' + ${listUtilisateurs[0].id}}" title="Dislike"><i class="fa-solid fa-circle-xmark fa-3x icon-red"></i></a>
+                        <a class="col-sm-4 pb-2 mb-2" th:href="@{'/utilisateurs/swipe/like/' + ${listUtilisateurs[0].id}}" title="Like"><i class="fa-solid fa-check-circle fa-3x icon-green"></i></a>
+                        <a th:if="${session.status == 'Privilège'}" class="col-sm-4 pb-2 mb-2" th:href="@{'/utilisateurs/liste/superlike/' + ${listUtilisateurs[0].id}}" title="Superlike"><i class="fa-solid fa-face-grin-hearts fa-3x icon-gold"></i></a>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="fragments/footer :: footer"></div>
+
+</body>
+</html>

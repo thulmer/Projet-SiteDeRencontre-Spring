@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html  xmlns:th="http://www.thymeleaf.org" lang="">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0">
+
+    <title>LUVMO - Mes Matchs</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
+
+    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/stylebs.css}"/>
+
+
+</head>
+<body>
+<header>
+    <div th:replace="fragments/header :: header"></div>
+</header>
+<div class="container-fluid">
+    <div class="container rounded mt-5 bg-light p-md-5 mb-3 shadow-sm">
+        <div class="h2 font-weight-bold">Chat</div>
+
+        <div class="container" id="messages">
+            <div th:if="${messageInfo!= null}" class="alert alert-success text-center">
+                [[${messageInfo}]]
+            </div>
+            <div th:each="mess : ${listMessages}">
+                <div th:if="${mess.expediteur == session.utilisateur}" class="row justify-content-right align-items-center">
+                    <div class="col align-middle text-muted text-right font-italic font-weight-light" th:text="${#dates.format(new java.util.Date(mess.date), 'yyyy-MM-dd HH:mm')}"></div>
+                    <div class="col-auto py-2 text-right bg-message-exp">[[${mess.contenu}]]</div>
+                    <div class="col-auto text-right">
+                        <img th:src="@{${'/images/utilisateurs/' + mess.expediteur.imgLink}}" class="rounded-circle imgMatchs" alt="">
+                        <div class="name">[[${mess.expediteur.prenom}]]</div>
+                    </div>
+                </div>
+                <div th:if="${mess.expediteur != session.utilisateur}" class="row justify-content-left align-items-center">
+                    <div class="col-auto"> <div class="pl-lg-5 pl-md-3 pl-1 name">[[${mess.expediteur.prenom}]]</div>
+                        <img th:src="@{${'/images/utilisateurs/' + mess.expediteur.imgLink}}" class="rounded-circle imgMatchs" alt="">
+                    </div>
+                    <div class="col-auto py-2 bg-message-dest">[[${mess.contenu}]]</div>
+                    <div class="col align-middle text-muted font-italic font-weight-light" th:text="${#dates.format(new java.util.Date(mess.date), 'yyyy-MM-dd HH:mm')}"></div>
+                </div>
+                <div id="spacing-row">
+                </div>
+            </div>
+        </div>
+        <form th:action="@{/matchs/chat/envoyer}" method="post" th:object="${message}" class="text-right">
+            <input type="hidden" id="destId" name="destId" th:value="${destinataire.id}"/>
+            <div class="input-group justify-content-end">
+                <input type="text" class="col-8 col-sm-6 rounded align-middle text-right" th:field="*{contenu}" autofocus required maxlength="500" placeholder="Message..."/>
+                <div class="input-group-append">
+                <input type="submit" value="Envoyer" class="btn btn-md" />
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div th:replace="fragments/footer :: footer"></div>
+
+</body>
+<script>
+    $(document).ready(function(){
+        setInterval(function(){load_messages_non_vus();}, 3000);
+    });
+    $(document).ready(load_messages_non_vus);
+
+    function load_messages_non_vus()
+        {
+            $.ajax({
+                type : 'POST',
+                url :  '[[@{/match/chat/check_messages_match}]]',
+                data: {idExp:'[[${destinataire.id}]]'},
+                 success: function(response) {
+                    $(response).load(response);
+                    $("#messages").append(response);
+                },
+                        error: function(response) {
+        }
+            });
+        };
+
+</script>
+</html>

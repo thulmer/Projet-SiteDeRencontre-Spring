@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html" lang="">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0">
+
+  <title>LUVMO - Inscription</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" ></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"></script>
+
+  <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}"/>
+  <link rel="stylesheet" type="text/css" th:href="@{/css/signin.css}"/>
+  <link rel="stylesheet" type="text/css" th:href="@{/css/stylebs.css}"/>
+
+
+
+</head>
+<body>
+<header>
+  <div th:replace="fragments/header :: header"></div>
+
+</header>
+<div th:if="${message!= null}" class="alert alert-danger text-center">
+  [[${message}]]
+</div>
+
+<div class="form-body text-center">
+<form class="form-signin" th:action="@{/inscription}" method="post" th:object="${utilisateur}" enctype="multipart/form-data" onsubmit="return checkEmail(this);">
+  <i class="fa-solid fa-ring fa-3x mb-2"></i>
+
+  <h1 class="h3 mb-3 font-weight-normal">[[${pageTitle}]]</h1>
+  <input type="hidden" th:field="*{id}" />
+
+  <div class="form-group">
+  <label for="email">Addresse courriel</label>
+  <input type="email" id="email" maxlength="120" class="form-control" th:field="*{email}" placeholder="Courriel" required autofocus
+         oninvalid="this.setCustomValidity('Veuillez entrer un email valide.')"
+         oninput="setCustomValidity('')">
+  </div>
+
+  <label for="password">Mot de passe</label>
+  <input type="password" id="password" class="form-control" th:field="*{password}" placeholder="Password" required
+         pattern="(?=^.{8,}$)((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$"
+         oninvalid="this.setCustomValidity('Votre mot de passe doit faire minimum 8 caractères de long, contenir au moins une minuscule, une majuscule et un nombre/caractère spécial..')"
+         oninput="setCustomValidity('')"
+  >
+
+  <label for="prenom">Prénom</label>
+  <input type="text" id="prenom" class="form-control" max="45" th:field="*{prenom}" placeholder="Prénom" required
+         pattern="[a-zA-Z]{1,30}"
+         oninvalid="this.setCustomValidity('Veuillez rentrer un prenom valide, lettres uniquement.')"
+         oninput="setCustomValidity('')">
+
+  <label for="age">Age</label>
+  <input type="number" min="21" value="21" max="100" step="any" id="age" class="form-control" th:field="*{age}" placeholder="Age" required
+         oninvalid="this.setCustomValidity('Veuillez rentrer un age valide.')"
+         oninput="setCustomValidity('')">
+
+  <label for="localisation">Localisation</label>
+  <input type="text" id="localisation" class="form-control" maxlength="60" th:field="*{localisation}" placeholder="Localisation" required
+         pattern="[a-zA-Z]{1,50}"
+         oninvalid="this.setCustomValidity('Veuillez rentrer une localisation valide, lettres uniquement.')"
+         oninput="setCustomValidity('')">
+
+  <label for="description" >Description</label>
+  <textarea class="form-control" id="description" th:field="*{description}" rows="3" maxlength="500" placeholder="Description..."></textarea>
+
+  <label>Photo</label>
+  <input type="file" id="fileImage" name="fileImage"/>
+
+  <div class="form-group py-3">
+    <label class="control-label" for="sexe">Je suis : </label>
+    <div class="form-check">
+      <label class="radio" for="homme"></label>
+      <input type="radio" id="homme" value="false" name="sexe" th:field="*{sexe}" checked />
+      Homme</label>
+    </div>
+    <div class="form-check">
+      <label class="radio" for="femme"></label>
+      <input type="radio" id="femme" value="true" name="sexe" th:field="*{sexe}"/>
+      Femme</label>
+    </div>
+  </div>
+
+  <div class="form-group pb-3">
+    <label class="control-label" for="preference">Je cherche des : </label>
+    <div class="form-check">
+      <label class="radio" for="hommes"></label>
+      <input type="radio" id="hommes" value="false" name="preference" th:field="*{preference}" />
+      Hommes</label>
+    </div>
+    <div class="form-check">
+      <label class="radio" for="femmes"></label>
+      <input type="radio" id="femmes" value="true" name="preference" th:field="*{preference}" checked/>
+      Femmes</label>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="emails">Recevoir des emails : </label>
+    <div class="checkbox mb-3">
+      <input type="checkbox" id="emails" th:field="*{recevoirEmails}">
+    </div>
+  </div>
+
+  <div th:if="${session.status == 'Admin'}" class="form-group">
+    <label for="statut">Statut : </label>
+      <div class="form-check">
+        <label class="radio" for="regulier"></label>
+        <input type="radio" id="regulier" value="false" name="statut" th:field="*{privilege}"/>
+        Régulier</label>
+      </div>
+      <div class="form-check">
+        <label class="radio" for="privilege"></label>
+        <input type="radio" id="privilege" value="true" name="statut" th:field="*{privilege}"/>
+        Privilège</label>
+      </div>
+  </div>
+
+  <div th:if="${session.status == 'Admin'}" class="form-group">
+    <label for="admin">Admin : </label>
+      <div class="checkbox mb-3">
+        <input type="checkbox" id="admin" th:field="*{admin}">
+      </div>
+  </div>
+
+  <button th:if="${session.status != 'Admin'}" class="btn btn-lg btn-block" type="submit">S'inscrire</button>
+  <button th:if="${session.status == 'Admin'}" class="btn btn-lg btn-block" type="submit">Ajouter</button>
+
+</form>
+</div>
+
+  <div th:replace="fragments/footer :: footer"></div>
+
+<!--Model dialogue -->
+<div class="modal fade text-center" id="modalDialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="modalTitle">Avertissement</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <span id="modalBody"></span>
+      </div>
+
+      <div class="modal-footer">
+        <button  type="button" class="btn btn-danger" data-dismiss="modal">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+                function checkEmail(form) {
+                    $.ajax({
+
+                        type : 'POST',
+                        url :  '[[@{/utilisateurs/check_email}]]',
+                        data: {email:$("#email").val(), id:$("#id").val()},
+                        success : function(data) {
+                            if(data==='OK'){
+                               form.submit();
+                            }else{
+                                showModalDialog("Avertissement", "Cet email est déjà pris.")
+                            }
+                        }
+                    });
+
+                    return false;
+                }
+                function showModalDialog(title, message) {
+                    $("#modalTitle").text(title);
+                    $("#modalBody").text(message);
+                    $("#modalDialog").modal();
+
+                }
+            </script>
+</body>
+</html>

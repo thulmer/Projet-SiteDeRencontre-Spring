@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html" lang="">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0">
+
+  <title>LUVMO - Login</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" ></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
+
+  <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}"/>
+  <link rel="stylesheet" type="text/css" th:href="@{/css/signin.css}"/>
+  <link rel="stylesheet" type="text/css" th:href="@{/css/stylebs.css}"/>
+
+
+
+</head>
+<body>
+<header>
+  <div th:replace="fragments/header :: header"></div>
+
+</header>
+<div th:if="${message!= null}" class="alert alert-success text-center">
+  [[${message}]]
+</div>
+<div th:if="${messageErreur!= null}" class="alert alert-danger text-center">
+  [[${messageErreur}]]
+</div>
+
+<div class="form-body text-center">
+<form class="form-signin" th:action="@{/connexion}" method="post" th:object="${utilisateur}" onsubmit="return checkIdentifiants(this);">
+  <i class="fa-solid fa-ring fa-3x mb-2"></i>
+  <h1 class="h3 mb-3 font-weight-normal">Se connecter</h1>
+  <label for="email" class="sr-only">Addresse courriel</label>
+  <input type="email" id="email" class="form-control" th:field="*{email}" placeholder="Courriel" required autofocus>
+  <label for="password" class="sr-only">Mot de passe</label>
+  <input type="password" id="password" class="form-control" th:field="*{password}" placeholder="Password" required>
+  <div class="checkbox mb-3">
+    <label>
+      <input type="checkbox" value="remember-me"> Se souvenir de moi
+    </label>
+  </div>
+  <button class="btn btn-lg btn-block" type="submit">Connexion</button>
+</form>
+</div>
+
+  <div th:replace="fragments/footer :: footer"></div>
+
+<!--Model dialogue -->
+<div class="modal fade text-center" id="modalDialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="modalTitle">Avertissement</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <span id="modalBody"></span>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-dismiss="modal">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+                function checkIdentifiants(form) {
+                    $.ajax({
+
+                        type : 'POST',
+                        url :  '[[@{/utilisateurs/check_identifiants}]]',
+                        data: {email:$("#email").val(), password:$("#password").val()},
+                        success : function(data) {
+                            if(data==='OK'){
+                               form.submit();
+                            }else{
+                                showModalDialog("Avertissement", "Identifiants invalides.")
+                            }
+                        }
+                    });
+
+                    return false;
+                }
+                function showModalDialog(title, message) {
+                    $("#modalTitle").text(title);
+                    $("#modalBody").text(message);
+                    $("#modalDialog").modal();
+
+                }
+            </script>
+</body>
+</html>
